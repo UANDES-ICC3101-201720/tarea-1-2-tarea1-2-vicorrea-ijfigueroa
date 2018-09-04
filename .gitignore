@@ -1,3 +1,6 @@
+# S files
+*.s
+
 # Prerequisites
 *.d
 
