@@ -54,6 +54,8 @@ int main(int argc, char** argv) {
     char buf[100];
     int fd,cl,rc;
 
+    printf("[datagen] Starting up. Press Ctrl-C to stop.\n");
+
     if ( (fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
         perror("[datagen] Error creating socket.\n");
         exit(-1);
@@ -67,11 +69,13 @@ int main(int argc, char** argv) {
 
     if (bind(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
         perror("[datagen] Bind error.\n");
+        close(fd);
         exit(-1);
     }
 
     if (listen(fd, 5) == -1) {
         perror("[datagen] Error listening for incoming connections.\n");
+        close(fd);
         exit(-1);
     }
 
@@ -119,6 +123,7 @@ int main(int argc, char** argv) {
             }
             else if (strstr(cmd, DATAGEN_END_CMD) != NULL) {
                 printf("[datagen] Now exiting.\n");
+                close(fd);
                 exit(0);
             }
             else {
@@ -127,6 +132,7 @@ int main(int argc, char** argv) {
         }
         if (rc == -1) {
             perror("[datagen] error reading.\n");
+            close(fd);
             exit(-1);
         }
         else if (rc == 0) {

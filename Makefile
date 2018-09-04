@@ -1,17 +1,17 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-std=gnu11 -Wall -Werror
 
-all: binsearch datagen
+all: quicksort datagen
 
 datagen: datagen.c 
 	$(CC) -o datagen datagen.c $(CFLAGS)
 
-binsearch: binsearch.c util.o
-	$(CC) -o binsearch binsearch.c util.o $(CFLAGS)
+quicksort: quicksort.c util.o
+	$(CC) -o quicksort quicksort.c util.o $(CFLAGS) # -lm -lpthread
 
 util.o:
 	$(CC) -c -o util.o util.c $(CFLAGS)
 
 clean:
-	rm datagen binsearch *.o
+	rm datagen quicksort *.o
  
