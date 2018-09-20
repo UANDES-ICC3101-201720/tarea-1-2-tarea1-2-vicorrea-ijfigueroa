@@ -118,14 +118,10 @@ int main(int argc, char** argv) {
     }
 
     /* DEMO: request two sets of unsorted random numbers to datagen */
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < experiments; i++) {
         /* T value 3 hardcoded just for testing. */
-<<<<<<< HEAD
         char begin[] = "BEGIN U ";
         strcat(begin,charT);
-=======
-        char *begin = "BEGIN U 6";
->>>>>>> 7ce78420d48d42b79837edb618f94a7c27947f94
         int rc = strlen(begin);
 
         /* Request the random number stream to datagen */
