@@ -29,8 +29,49 @@ int main(int argc, char** argv) {
            sysconf(_SC_NPROCESSORS_ONLN));
 
     /* TODO: parse arguments with getopt */
+    int experiments = 0;
+    int t = 0;
+    int c;
+    char charT[2]= "";
+
+    while((c = getopt (argc, argv, "T:E:")) !=-1){
+        switch(c){
+            case 'T':
+            strcpy(charT, optarg);
+            t = atoi(optarg);
+            if(t < 3 || t > 9){
+                fprintf(stderr, "%s\n", "T must be betweeen 3 and 9");
+                return 0;
+            }
+            
+            case 'E':
+            experiments = atoi(optarg);
+            if(experiments < 1){
+                fprintf(stderr, "%s\n","Number of experiments must be greater or equal than 1" );
+                return 0;
+            }
+        }
+    }
+    printf("T: %d, E: %d\n", t, experiments);
 
     /* TODO: start datagen here as a child process. */
+    int dtgnid = fork();
+
+    if(dtgnid == 0){
+        printf("%s%d\n","Datagen PID: ", getpid());
+        char * myargs[3];
+        myargs[0] = "./datagen";
+        myargs[1] = "inicio";
+        myargs[2] = NULL;
+        execvp(myargs[0], myargs);
+    }
+    else if(dtgnid>0){
+        printf("%s%d\n", "Quicksort PID: ", getpid());
+    }
+
+    else if (dtgnid<0){
+        fprintf(stderr, "%s\n", "Can't create Datagen as child process");
+    }
 
     /* Create the domain socket to talk to datagen. */
     struct sockaddr_un addr;
