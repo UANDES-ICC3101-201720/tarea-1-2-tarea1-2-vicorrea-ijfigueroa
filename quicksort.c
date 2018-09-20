@@ -155,9 +155,9 @@ int main(int argc, char** argv) {
             readbytes = read(fd, readbuf + readvalues, sizeof(UINT) * 1000);
             readvalues += readbytes / 4;
         }
-        printf("E%d: ",i);
+        printf("E%d:\n",i);
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
-            printf("%u, ", *pv);
+            printf("%u\n", *pv);
         }
         // Quicksorting
 		struct timespec start, finish;
@@ -176,13 +176,18 @@ int main(int argc, char** argv) {
 		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
 
 		/* Print the time elapsed (in seconds) */
+<<<<<<< HEAD
 		printf("\n\nTiempo: %lf\n\n\n", elapsed);
+=======
+        printf("\n");
+		printf("Tiempo quicksort: %lf\n", elapsed);
+>>>>>>> cbf545ddd2c08ff1bc30dd89f237e65a4f906e41
         // 
         quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
-        printf("\nS%d: ",i);
+        printf("\nS%d:\n",i);
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
-            printf("%u, ", *pv);
+            printf("%u\n", *pv);
         }
 
         free(readbuf);
