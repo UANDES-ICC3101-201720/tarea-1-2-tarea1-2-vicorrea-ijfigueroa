@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
             readbytes = read(fd, readbuf + readvalues, sizeof(UINT) * 1000);
             readvalues += readbytes / 4;
         }
-        printf("E%d:\n",i);
+        printf("E%d:\n", i);
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
             printf("%u\n", *pv);
         }
@@ -176,22 +176,18 @@ int main(int argc, char** argv) {
 		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
 
 		/* Print the time elapsed (in seconds) */
-<<<<<<< HEAD
-		printf("\n\nTiempo: %lf\n\n\n", elapsed);
-=======
-        printf("\n");
-		printf("Tiempo quicksort: %lf\n", elapsed);
->>>>>>> cbf545ddd2c08ff1bc30dd89f237e65a4f906e41
+
+		printf("\nTiempo quicksort: %lf\n\n", elapsed);
         // 
         quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
-        printf("\nS%d:\n",i);
+        printf("S%d:\n", i);
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
             printf("%u\n", *pv);
         }
 
         free(readbuf);
-
+        printf("Fin de la ejecucion numero %d.\n", i);
     }
 
     /* Issue the END command to datagen */
@@ -199,7 +195,7 @@ int main(int argc, char** argv) {
     if (write(fd, DATAGEN_END_CMD, strlen(DATAGEN_END_CMD)) != rc) {
         if (rc > 0) fprintf(stderr, "[quicksort] partial write.\n");
         else {
-            perror("[quicksort] write error.\n");
+            perror("[quicksort] write error.\n\n");
             close(fd);
             exit(-1);
         }
