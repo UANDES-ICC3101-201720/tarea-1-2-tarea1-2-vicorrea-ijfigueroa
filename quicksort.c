@@ -118,14 +118,10 @@ int main(int argc, char** argv) {
     }
 
     /* DEMO: request two sets of unsorted random numbers to datagen */
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < experiments; i++) {
         /* T value 3 hardcoded just for testing. */
-<<<<<<< HEAD
         char begin[] = "BEGIN U ";
         strcat(begin,charT);
-=======
-        char *begin = "BEGIN U 6";
->>>>>>> 7ce78420d48d42b79837edb618f94a7c27947f94
         int rc = strlen(begin);
 
         /* Request the random number stream to datagen */
@@ -159,13 +155,34 @@ int main(int argc, char** argv) {
             readbytes = read(fd, readbuf + readvalues, sizeof(UINT) * 1000);
             readvalues += readbytes / 4;
         }
-
+        printf("E%d: ",i);
+        for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
+            printf("%u, ", *pv);
+        }
         // Quicksorting
+		struct timespec start, finish;
+		double elapsed = 0;
 
+		/* Get the wall clock time at start */
+		clock_gettime(CLOCK_MONOTONIC, &start);
+
+		quicksort(readbuf, 0, numvalues);
+
+		/* Get the wall clock time at finish */
+		clock_gettime(CLOCK_MONOTONIC, &finish);
+
+		/* Calculate time elapsed */
+		elapsed = (finish.tv_sec - start.tv_sec);
+		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+		/* Print the time elapsed (in seconds) */
+		printf("%lf\n", elapsed);
+        // 
         quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
+        printf("\nS%d: ",i);
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
-            printf("%u\n", *pv);
+            printf("%u, ", *pv);
         }
 
         free(readbuf);
