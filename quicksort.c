@@ -11,9 +11,34 @@
 #include "const.h"
 #include "util.h"
 
+void swap(UINT *a, UINT *b){
+	UINT temp = *a;
+	*a=*b;
+	*b=temp;
+}
+
+int partition(UINT  *A, int lo, int hi){
+	int pivot = A[hi];
+	int i = (lo-1);
+
+	for(int j = lo; j<=hi-1; j++){
+		if(A[j]<= pivot){
+			i++;
+			swap(&A[i], &A[j]);
+		}
+	}
+	swap(&A[i+1], &A[hi]);
+	return (i+1);
+}
+
 // TODO: implement
-int quicksort(UINT* A, int lo, int hi) {
-    return 0;
+void quicksort(UINT* A, int lo, int hi) {
+	if(lo<hi){
+		int pi = partition(A, lo, hi);
+		quicksort(A, lo, pi-1);
+		quicksort(A, pi+1, hi);
+	}
+
 }
 
 // TODO: implement
@@ -95,7 +120,7 @@ int main(int argc, char** argv) {
     /* DEMO: request two sets of unsorted random numbers to datagen */
     for (int i = 0; i < 2; i++) {
         /* T value 3 hardcoded just for testing. */
-        char *begin = "BEGIN U 3";
+        char *begin = "BEGIN U 6";
         int rc = strlen(begin);
 
         /* Request the random number stream to datagen */
@@ -130,12 +155,16 @@ int main(int argc, char** argv) {
             readvalues += readbytes / 4;
         }
 
+        // Quicksorting
+
+        quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
             printf("%u\n", *pv);
         }
 
         free(readbuf);
+
     }
 
     /* Issue the END command to datagen */
