@@ -155,11 +155,33 @@ int main(int argc, char** argv) {
             readbytes = read(fd, readbuf + readvalues, sizeof(UINT) * 1000);
             readvalues += readbytes / 4;
         }
-
+        printf("E%d:\n",i);
+        for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
+            printf("%u\n", *pv);
+        }
         // Quicksorting
+		struct timespec start, finish;
+		double elapsed = 0;
 
+		/* Get the wall clock time at start */
+		clock_gettime(CLOCK_MONOTONIC, &start);
+
+		quicksort(readbuf, 0, numvalues);
+
+		/* Get the wall clock time at finish */
+		clock_gettime(CLOCK_MONOTONIC, &finish);
+
+		/* Calculate time elapsed */
+		elapsed = (finish.tv_sec - start.tv_sec);
+		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+
+		/* Print the time elapsed (in seconds) */
+        printf("\n");
+		printf("Tiempo quicksort: %lf\n", elapsed);
+        // 
         quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
+        printf("\nS%d:\n",i);
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
             printf("%u\n", *pv);
         }
