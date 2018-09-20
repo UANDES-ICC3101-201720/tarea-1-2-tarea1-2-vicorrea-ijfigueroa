@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
 		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
 
 		/* Print the time elapsed (in seconds) */
-		printf("%lf\n", elapsed);
+		printf("\n\nTiempo: %lf\n\n\n", elapsed);
         // 
         quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
