@@ -187,7 +187,7 @@ int main(int argc, char** argv) {
         }
 
         free(readbuf);
-        printf("Fin de la ejecucion numero %d.\n", i);
+        printf("Fin de la ejecucion numero %d.\n\n", i);
     }
 
     /* Issue the END command to datagen */
@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
     if (write(fd, DATAGEN_END_CMD, strlen(DATAGEN_END_CMD)) != rc) {
         if (rc > 0) fprintf(stderr, "[quicksort] partial write.\n");
         else {
-            perror("[quicksort] write error.\n\n");
+            perror("[quicksort] write error.\n");
             close(fd);
             exit(-1);
         }
