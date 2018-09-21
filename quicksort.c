@@ -48,26 +48,30 @@ void quicksort(UINT* A, int lo, int hi) {
 }*/
 
 void parallel_quicksort(UINT* A, int lo, int hi) {
-    int n = hi-ho;
+    int n = hi-lo;
     printf("Arreglo de largo %d\n", n);
     int cantidad_threads = 2*sysconf(_SC_NPROCESSORS_ONLN);
     int sub_block_size = n/cantidad_threads;
     int cant_bloque_sobrante = n - sub_block_size*cantidad_threads;
     int extra = 0;
+    int inicios[cantidad_threads];
+    int finales[cantidad_threads];
     for (int i = 0; i < cantidad_threads; i++){       
         printf("i = %d, extra = %d\n", i, extra);
         if (i < cant_bloque_sobrante){            
             printf("Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra);
+            inicios[i] = (sub_block_size*i)+extra;
+            finales[i] = (sub_block_size*(i+1))+extra;
             extra ++;
             }
         else{
             printf(">> Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra-1);
+            inicios[i] = (sub_block_size*i)+extra;
+            finales[i] = (sub_block_size*(i+1))+extra-1;
         }
+        printf("%d\n", inicios[i]);
+        printf("%d\n", finales[i]);
     }
-    /*
-    for (int i = 0; i < cant_bloque_sobrante; i++){
-        printf("Sumando 1 al bloque %d\n", i);
-    }*/
 
 }
 
@@ -203,15 +207,14 @@ int main(int argc, char** argv) {
 
 		/* Print the time elapsed (in seconds) */
 
-<<<<<<< HEAD
 		printf("\n\nTiempo: %lf\n\n\n", elapsed);
 
         printf("\n");
 		printf("Tiempo quicksort: %lf\n", elapsed);
 
-=======
+
 		printf("\nTiempo quicksort: %lf\n\n", elapsed);
->>>>>>> bb9f8037b25a3d7f7d0d5589521143b69109c578
+
         // 
         quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
