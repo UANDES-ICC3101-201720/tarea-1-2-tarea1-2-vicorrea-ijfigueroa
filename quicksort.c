@@ -203,7 +203,15 @@ int main(int argc, char** argv) {
 
 		/* Print the time elapsed (in seconds) */
 
+<<<<<<< HEAD
+		printf("\n\nTiempo: %lf\n\n\n", elapsed);
+
+        printf("\n");
+		printf("Tiempo quicksort: %lf\n", elapsed);
+
+=======
 		printf("\nTiempo quicksort: %lf\n\n", elapsed);
+>>>>>>> bb9f8037b25a3d7f7d0d5589521143b69109c578
         // 
         quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
