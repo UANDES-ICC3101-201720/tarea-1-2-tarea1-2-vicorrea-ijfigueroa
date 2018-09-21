@@ -6,10 +6,19 @@
 #include <sys/un.h>
 #include <stdbool.h>
 #include <string.h>
+#include <pthread.h>
 #include <time.h>
 #include "types.h"
 #include "const.h"
 #include "util.h"
+
+
+typedef struct {
+	UINT *arreglo;
+	int lo;
+	int hi;
+	int pivot;
+} arguments;
 
 void swap(UINT *a, UINT *b){
 	UINT temp = *a;
@@ -43,9 +52,22 @@ void quicksort(UINT* A, int lo, int hi) {
 
 // TODO: implement
 
-/*int parallel_partition(UINT* A, int lo, int hi){
-
-}*/
+void parallel_partition(void *args){
+	arguments *argumentos = args;
+	UINT *A = argumentos->arreglo;
+	int lo = argumentos->lo;
+	int hi = argumentos->hi;
+	int pivot = argumentos -> pivot;
+	int i = (lo-1);
+	for(int j = lo; j<=hi-1; j++){
+		if(A[j]<= pivot){
+			i++;
+			swap(&A[i], &A[j]);
+		}
+	}
+	swap(&A[i+1], &A[hi]);
+	
+}
 
 void parallel_quicksort(UINT* A, int lo, int hi) {
     int n = hi-lo;
@@ -72,6 +94,24 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
         printf("%d\n", inicios[i]);
         printf("%d\n", finales[i]);
     }
+
+    int pivot = rand() % (hi-lo+1)+lo;
+    pthread_t threads[cantidad_threads]; 
+    for (int i = 0; i<cantidad_threads; i++){
+    	arguments *argumentos = malloc(sizeof(argumentos));
+    	argumentos->arreglo = A;
+    	argumentos->lo = inicios[i];
+    	argumentos->hi = finales[i];
+    	argumentos->pivot = pivot;
+    	
+    	int ver = pthread_create(&threads[i], NULL,(void *)parallel_partition, argumentos);
+    	pthread_join(threads[i], NULL);
+    	if(ver){
+    		free(argumentos);
+    	}
+
+    }
+
 
 }
 
