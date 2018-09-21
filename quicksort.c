@@ -42,8 +42,33 @@ void quicksort(UINT* A, int lo, int hi) {
 }
 
 // TODO: implement
-int parallel_quicksort(UINT* A, int lo, int hi) {
-    return 0;
+
+/*int parallel_partition(UINT* A, int lo, int hi){
+
+}*/
+
+void parallel_quicksort(UINT* A, int lo, int hi) {
+    int n = hi-ho;
+    printf("Arreglo de largo %d\n", n);
+    int cantidad_threads = 2*sysconf(_SC_NPROCESSORS_ONLN);
+    int sub_block_size = n/cantidad_threads;
+    int cant_bloque_sobrante = n - sub_block_size*cantidad_threads;
+    int extra = 0;
+    for (int i = 0; i < cantidad_threads; i++){       
+        printf("i = %d, extra = %d\n", i, extra);
+        if (i < cant_bloque_sobrante){            
+            printf("Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra);
+            extra ++;
+            }
+        else{
+            printf(">> Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra-1);
+        }
+    }
+    /*
+    for (int i = 0; i < cant_bloque_sobrante; i++){
+        printf("Sumando 1 al bloque %d\n", i);
+    }*/
+
 }
 
 int main(int argc, char** argv) {
@@ -167,6 +192,7 @@ int main(int argc, char** argv) {
 		clock_gettime(CLOCK_MONOTONIC, &start);
 
 		quicksort(readbuf, 0, numvalues);
+        parallel_quicksort(readbuf, 0, numvalues);
 
 		/* Get the wall clock time at finish */
 		clock_gettime(CLOCK_MONOTONIC, &finish);
