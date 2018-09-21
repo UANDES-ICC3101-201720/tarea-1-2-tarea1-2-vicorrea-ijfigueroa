@@ -13,11 +13,12 @@
 #include "util.h"
 
 
+
 typedef struct {
 	UINT *arreglo;
 	int lo;
 	int hi;
-	int pivot;
+	UINT pivot;
 } arguments;
 
 void swap(UINT *a, UINT *b){
@@ -42,6 +43,10 @@ int partition(UINT  *A, int lo, int hi){
 
 // TODO: implement
 void quicksort(UINT* A, int lo, int hi) {
+    int n = hi - lo;
+    for (int a = 0; a < n; a++){
+        printf("A[a] = %d\n", A[a]);
+    }
 	if(lo<hi){
 		int pi = partition(A, lo, hi);
 		quicksort(A, lo, pi-1);
@@ -57,10 +62,10 @@ void parallel_partition(void *args){
 	UINT *A = argumentos->arreglo;
 	int lo = argumentos->lo;
 	int hi = argumentos->hi;
-	int pivot = argumentos -> pivot;
+	UINT pivot = argumentos -> pivot;
 	int i = (lo-1);
 	for(int j = lo; j<=hi-1; j++){
-		if(A[j]<= pivot){
+		if(A[j] <= pivot){
 			i++;
 			swap(&A[i], &A[j]);
 		}
@@ -70,7 +75,7 @@ void parallel_partition(void *args){
 }
 
 void parallel_quicksort(UINT* A, int lo, int hi) {
-    int n = hi-lo;
+    int n = hi - lo;
     printf("Arreglo de largo %d\n", n);
     int cantidad_threads = 2*sysconf(_SC_NPROCESSORS_ONLN);
     int sub_block_size = n/cantidad_threads;
@@ -95,27 +100,55 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
         printf("%d\n", finales[i]);
     }
 
-    int pivot = rand() % (hi-lo+1)+lo;
+    int pivot = (rand() % (hi-lo)) + lo;
+    printf("pivot: %d\n", A[pivot]);
     pthread_t threads[cantidad_threads]; 
     for (int i = 0; i<cantidad_threads; i++){
     	arguments *argumentos = malloc(sizeof(argumentos));
     	argumentos->arreglo = A;
     	argumentos->lo = inicios[i];
     	argumentos->hi = finales[i];
-    	argumentos->pivot = pivot;
+    	argumentos->pivot = A[pivot];
     	
     	int ver = pthread_create(&threads[i], NULL,(void *)parallel_partition, argumentos);
     	pthread_join(threads[i], NULL);
     	if(ver){
     		free(argumentos);
     	}
-
     }
 
+    for (int a = 0; a < n; a++){
+        printf("A[%d] = %u\n", a, A[a]);
+    }
+
+
+    /*
+    int contador = 0;
+    UINT A_prima[n];
+
+    for (int a = 0; a < n; a++){
+        if (A[a] <= A[pivot]){
+            A_prima[contador] = A[a];
+            contador++;
+        }
+    }
+    for (int b = 0; b < n; b++){
+        if (A[b] > A[pivot]){
+            A_prima[contador] = A[b];
+            contador++;
+        }
+    }
+
+    for (int p = 0; p < n; p++){
+        printf("%d\n", A_prima[p]);
+    }
+    */
+    
 
 }
 
 int main(int argc, char** argv) {
+    srand (getpid());
     printf("[quicksort] Starting up...\n");
 
     /* Get the number of CPU cores available */
@@ -147,6 +180,8 @@ int main(int argc, char** argv) {
         }
     }
     printf("T: %d, E: %d\n", t, experiments);
+
+
 
     /* TODO: start datagen here as a child process. */
     int dtgnid = fork();
@@ -235,7 +270,7 @@ int main(int argc, char** argv) {
 		/* Get the wall clock time at start */
 		clock_gettime(CLOCK_MONOTONIC, &start);
 
-		quicksort(readbuf, 0, numvalues);
+		//quicksort(readbuf, 0, numvalues);
         parallel_quicksort(readbuf, 0, numvalues);
 
 		/* Get the wall clock time at finish */
@@ -256,7 +291,7 @@ int main(int argc, char** argv) {
 		printf("\nTiempo quicksort: %lf\n\n", elapsed);
 
         // 
-        quicksort(readbuf, 0, numvalues);
+        //quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
         printf("S%d:\n", i);
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
