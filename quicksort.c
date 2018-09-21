@@ -176,12 +176,12 @@ int main(int argc, char** argv) {
 		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
 
 		/* Print the time elapsed (in seconds) */
-<<<<<<< HEAD
+
 		printf("\n\nTiempo: %lf\n\n\n", elapsed);
-=======
+
         printf("\n");
 		printf("Tiempo quicksort: %lf\n", elapsed);
->>>>>>> cbf545ddd2c08ff1bc30dd89f237e65a4f906e41
+
         // 
         quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
