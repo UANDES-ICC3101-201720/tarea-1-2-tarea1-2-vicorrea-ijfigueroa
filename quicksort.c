@@ -43,10 +43,6 @@ int partition(UINT  *A, int lo, int hi){
 
 // TODO: implement
 void quicksort(UINT* A, int lo, int hi) {
-    int n = hi - lo;
-    for (int a = 0; a < n; a++){
-        printf("A[a] = %d\n", A[a]);
-    }
 	if(lo<hi){
 		int pi = partition(A, lo, hi);
 		quicksort(A, lo, pi-1);
@@ -57,7 +53,7 @@ void quicksort(UINT* A, int lo, int hi) {
 
 // TODO: implement
 
-void parallel_partition(void *args){
+void * parallel_partition(void *args){
 	arguments *argumentos = args;
 	UINT *A = argumentos->arreglo;
 	int lo = argumentos->lo;
@@ -71,6 +67,8 @@ void parallel_partition(void *args){
 		}
 	}
 	swap(&A[i+1], &A[hi]);
+    size_t v = (size_t)i;
+    return (void*) v;
 	
 }
 
@@ -100,26 +98,46 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
         printf("%d\n", finales[i]);
     }
 
-    int pivot = (rand() % (hi-lo)) + lo;
-    printf("pivot: %d\n", A[pivot]);
+    UINT pivot = (rand() % (hi-lo)) + lo;
+    printf("pivot: %u\n", A[pivot]);
     pthread_t threads[cantidad_threads]; 
+
+    int Si[cantidad_threads];
+    int Li[cantidad_threads];
+
     for (int i = 0; i<cantidad_threads; i++){
     	arguments *argumentos = malloc(sizeof(argumentos));
     	argumentos->arreglo = A;
     	argumentos->lo = inicios[i];
     	argumentos->hi = finales[i];
     	argumentos->pivot = A[pivot];
+
+        printf("inicios[%d] = %d, finales[%d] = %d\n", i, inicios[i], i, finales[i]);
     	
-    	int ver = pthread_create(&threads[i], NULL,(void *)parallel_partition, argumentos);
-    	pthread_join(threads[i], NULL);
+        int * respuesta;
+    	int ver = pthread_create(&threads[i], NULL, parallel_partition, argumentos);
+    	pthread_join(threads[i], (void **)&respuesta);
+
+        printf("respuesta = %d\n", (int)(intptr_t)respuesta);
+
+        Si[i] = (int)(intptr_t)respuesta - inicios[i];
+        Li[i] = finales[i] - (int)(intptr_t)respuesta + 1;
+
     	if(ver){
     		free(argumentos);
     	}
     }
 
+    for (int u = 0; u < cantidad_threads; u++){
+            printf("Si[%d] = %d\n", u, Si[u]);
+            printf("Li[%d] = %d\n", u, Li[u]);
+        }
+
+    /*
     for (int a = 0; a < n; a++){
         printf("A[%d] = %u\n", a, A[a]);
-    }
+    }*/
+
 
 
     /*
@@ -293,10 +311,11 @@ int main(int argc, char** argv) {
         // 
         //quicksort(readbuf, 0, numvalues);
         /* Print out the values obtained from datagen */
+        /*
         printf("S%d:\n", i);
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
             printf("%u\n", *pv);
-        }
+        }*/
 
         free(readbuf);
         printf("Fin de la ejecucion numero %d.\n\n", i);
