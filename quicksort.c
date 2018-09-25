@@ -122,17 +122,10 @@ void parallel_quicksort(UINT* A, UINT lo, UINT hi, UINT cantidad_threads) {
         	argumentos->arreglo = A;
         	argumentos->lo = inicios[i];
         	argumentos->hi = finales[i];
-        	argumentos->pivot = pivot_value;
-
-            
-        	
-            UINT * respuesta;
-            
+        	argumentos->pivot = pivot_value; 	
+            UINT * respuesta;          
         	int ver = pthread_create(&threads[i], NULL, parallel_partition, argumentos);
         	pthread_join(threads[i], (void **)&respuesta);
-
-            
-
             Si[i] = (UINT)(intptr_t)respuesta - inicios[i]+1;
             Li[i] = finales[i] - (UINT)(intptr_t)respuesta;
 
