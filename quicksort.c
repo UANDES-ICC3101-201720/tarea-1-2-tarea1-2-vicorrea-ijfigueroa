@@ -133,35 +133,16 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
             printf("Li[%d] = %d\n", u, Li[u]);
         }
 
-    /*
-    for (int a = 0; a < n; a++){
-        printf("A[%d] = %u\n", a, A[a]);
-    }*/
+    UINT Qi = 0;
+    UINT Ri = 0;
+    for (int *ind=Si; ind<Si+cantidad_threads;ind++){
+    	Qi=Qi+*ind;
 
-
-
-    /*
-    int contador = 0;
-    UINT A_prima[n];
-
-    for (int a = 0; a < n; a++){
-        if (A[a] <= A[pivot]){
-            A_prima[contador] = A[a];
-            contador++;
-        }
     }
-    for (int b = 0; b < n; b++){
-        if (A[b] > A[pivot]){
-            A_prima[contador] = A[b];
-            contador++;
-        }
+    for (int *ind=Li; ind<Li+cantidad_threads; ind++){
+    	Ri=Ri+*ind;
     }
-
-    for (int p = 0; p < n; p++){
-        printf("%d\n", A_prima[p]);
-    }
-    */
-    
+    printf("Qi:%u \nRi: %u", Qi, Ri);
 
 }
 
