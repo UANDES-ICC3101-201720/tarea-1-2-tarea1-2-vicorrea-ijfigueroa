@@ -1,0 +1,11 @@
+Integrantes: 
+	Vicente Correa 
+	Ignacio Figueroa
+
+Problemas encontrados en la implementación:
+	Durante la implementación del algoritmo tuvimos problemas al momento de decidir una 		correcta distribución de la cantidad de threads para cada sub arreglo. Finalmente 		decidimos repartir los threads a los sub arreglos por mitades. 
+	Tambien tuvimos problemas cuando cada thread no tenia la misma cantidad de elementos, 		aqui se repetían valores al momento de hacer el reordenamiento global pero supimos 		arreglarlo y seguir adelante.
+
+Funcionalidad pendiente sin implementar: 
+	Nuestro algoritmo, por algún motivo cercano a la redistribución de threads en los nuevos 		sub arreglos, no ordena completamente el arreglo entregado al algoritmo pero si ordena 		gran parte de él. A su vez, cada parte que no esta ordenada en el arreglo principal, está 		ordenada.
+	
