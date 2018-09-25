@@ -86,10 +86,9 @@ void * parallel_partition(void *args){
 	
 }
 
-void parallel_quicksort(UINT* A, UINT lo, UINT hi) {
+void parallel_quicksort(UINT* A, UINT lo, UINT hi, UINT cantidad_threads) {
     UINT n = hi - lo;
-    printf("Arreglo de largo %d\n", n);
-    UINT cantidad_threads = 2*sysconf(_SC_NPROCESSORS_ONLN);
+    printf("Arreglo de largo %d\n", n);  
     //UINT cantidad_threads = 16;
     UINT sub_block_size = n/cantidad_threads;
     UINT cant_bloque_sobrante = n - sub_block_size*cantidad_threads;
@@ -371,7 +370,9 @@ int main(int argc, char** argv) {
 		//quicksort(readbuf, 0, numvalues);
 		//UINT arr[64] = {7, 13, 18, 2, 17,22, 76, 87, 98, 76, 54, 65, 45,83, 65, 43,15, 39, 1, 14, 20, 6, 10, 15, 9, 43, 34,23,11,22,33, 43, 47, 48, 55, 77, 3, 16, 19, 4, 11, 12, 5, 8, 12, 34, 52, 64, 34, 45, 23, 89, 99, 45, 24, 23, 54, 76, 59, 76, 53, 65, 45, 87};
         //parallel_quicksort(arr, 0, 64);
-		parallel_quicksort(readbuf, 0, numvalues);
+        UINT cantidad_threads = 2*sysconf(_SC_NPROCESSORS_ONLN);
+
+		parallel_quicksort(readbuf, 0, numvalues, cantidad_threads);
 		/* Get the wall clock time at finish */
 		clock_gettime(CLOCK_MONOTONIC, &finish);
 
