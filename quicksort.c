@@ -132,9 +132,16 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
             printf("Si[%d] = %d\n", u, Si[u]);
             printf("Li[%d] = %d\n", u, Li[u]);
         }
-
+    printf("n=%d\n",n );
+    UINT index_partitions[cantidad_threads];
+    index_partitions[0]=lo;
+    for (UINT i = 1; i<cantidad_threads; i++){
+    	index_partitions[i]=Si[i]+Li[i]+index_partitions[i-1];
+    	printf("Index[%u]\n",index_partitions[i]);
+    }
     UINT Qi = 0;
     UINT Ri = 0;
+    UINT A_prima[n];
     for (int *ind=Si; ind<Si+cantidad_threads;ind++){
     	Qi=Qi+*ind;
 
@@ -142,7 +149,19 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
     for (int *ind=Li; ind<Li+cantidad_threads; ind++){
     	Ri=Ri+*ind;
     }
-    printf("Qi:%u \nRi: %u", Qi, Ri);
+    
+    UINT cont = 0;
+    for (int i = 1; i<cantidad_threads; i++){
+    	for (int j = index_partitions[i-1]; j<index_partitions[i]-Li[i-1];j++){
+    		A_prima[cont]=A[j];
+    		printf("A[%d] = %u\n",cont, A_prima[cont]);
+    		cont++;
+    	}
+    }
+    printf("Qi =%u\n", Qi);
+
+
+
 
 }
 
