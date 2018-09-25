@@ -175,7 +175,15 @@ void parallel_quicksort(UINT* A, UINT lo, UINT hi) {
 
     
     UINT aumento = 0;
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+    UINT con_pos = 0;
+=======
+>>>>>>> 5973c91b1e83ff9db16bb8212581ed851d82455d
+>>>>>>> a6940380d067a3d8fe13aa8f6693c07bbbced757
+>>>>>>> 0a09ab7329ee68f9ed44f94ccf22a57dedc9e8fd
     for(UINT i = 0; i<cantidad_threads; i++){
         
         if (i > 0){
@@ -188,8 +196,13 @@ void parallel_quicksort(UINT* A, UINT lo, UINT hi) {
     		printf("J=%u\n", j);
     		*ind = A[j];
     		ind++;
+            con_pos++;
     	}
     }
+
+    UINT mitad = con_pos;
+    printf("--------------> mitad = %d\n", mitad);
+
     aumento = 0;
     for(UINT i = 0; i<cantidad_threads; i++){
         
@@ -203,22 +216,21 @@ void parallel_quicksort(UINT* A, UINT lo, UINT hi) {
     		printf("J=%u\n", j);
     		*ind = A[j];
     		ind++;
+            con_pos++;
     	}
 
     }
-	
+	printf("--------------> final = %d\n", con_pos);
+
     UINT cont = 0;
     for (UINT *ind = A_prima; ind<A_prima +n; ind++){
     	printf("A[%d] = %u\n", cont, *ind);
     	cont++;
     }
-    
 
 
-
-
-
-
+    parallel_quicksort(A, lo, mitad);
+    parallel_quicksort(A, mitad+1, hi);
 
 }
 
