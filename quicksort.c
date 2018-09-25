@@ -56,18 +56,24 @@ void quicksort(UINT* A, int lo, int hi) {
 void * parallel_partition(void *args){
 	arguments *argumentos = args;
 	UINT *A = argumentos->arreglo;
+	for (UINT *z = A; z<A+64; z++){
+		printf("%d,",*z);
+	}
 	int lo = argumentos->lo;
 	int hi = argumentos->hi;
+	printf("Lohi: %d, %d\n",lo, hi);
 	UINT pivot = argumentos -> pivot;
 	int i = (lo-1);
-	for(int j = lo; j<=hi-1; j++){
+	for(int j = lo; j<=hi; j++){
 		if(A[j] <= pivot){
 			i++;
 			swap(&A[i], &A[j]);
 		}
 	}
-	swap(&A[i+1], &A[hi]);
+	
+	printf("i=%d\n",i);
     size_t v = (size_t)i;
+
     return (void*) v;
 	
 }
@@ -75,7 +81,8 @@ void * parallel_partition(void *args){
 void parallel_quicksort(UINT* A, int lo, int hi) {
     int n = hi - lo;
     printf("Arreglo de largo %d\n", n);
-    int cantidad_threads = 2*sysconf(_SC_NPROCESSORS_ONLN);
+    //int cantidad_threads = 2*sysconf(_SC_NPROCESSORS_ONLN);
+    int cantidad_threads = 16;
     int sub_block_size = n/cantidad_threads;
     int cant_bloque_sobrante = n - sub_block_size*cantidad_threads;
     int extra = 0;
@@ -84,13 +91,13 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
     for (int i = 0; i < cantidad_threads; i++){       
         printf("i = %d, extra = %d\n", i, extra);
         if (i < cant_bloque_sobrante){            
-            printf("Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra);
+            //printf("Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra);
             inicios[i] = (sub_block_size*i)+extra;
             finales[i] = (sub_block_size*(i+1))+extra;
             extra ++;
             }
         else{
-            printf(">> Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra-1);
+            //printf(">> Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra-1);
             inicios[i] = (sub_block_size*i)+extra;
             finales[i] = (sub_block_size*(i+1))+extra-1;
         }
@@ -99,6 +106,7 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
     }
 
     UINT pivot = (rand() % (hi-lo)) + lo;
+    //UINT pivot = 0;
     printf("pivot: %u\n", A[pivot]);
     pthread_t threads[cantidad_threads]; 
 
@@ -115,13 +123,14 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
         printf("inicios[%d] = %d, finales[%d] = %d\n", i, inicios[i], i, finales[i]);
     	
         int * respuesta;
+        
     	int ver = pthread_create(&threads[i], NULL, parallel_partition, argumentos);
     	pthread_join(threads[i], (void **)&respuesta);
 
         printf("respuesta = %d\n", (int)(intptr_t)respuesta);
 
-        Si[i] = (int)(intptr_t)respuesta - inicios[i];
-        Li[i] = finales[i] - (int)(intptr_t)respuesta + 1;
+        Si[i] = (int)(intptr_t)respuesta - inicios[i]+1;
+        Li[i] = finales[i] - (int)(intptr_t)respuesta;
 
     	if(ver){
     		free(argumentos);
@@ -141,7 +150,7 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
     }
     UINT Qi = 0;
     UINT Ri = 0;
-    UINT A_prima[n];
+    //UINT A_prima[n];
     for (int *ind=Si; ind<Si+cantidad_threads;ind++){
     	Qi=Qi+*ind;
 
@@ -150,15 +159,31 @@ void parallel_quicksort(UINT* A, int lo, int hi) {
     	Ri=Ri+*ind;
     }
     
-    UINT cont = 0;
-    for (int i = 1; i<cantidad_threads; i++){
-    	for (int j = index_partitions[i-1]; j<index_partitions[i]-Li[i-1];j++){
-    		A_prima[cont]=A[j];
-    		printf("A[%d] = %u\n",cont, A_prima[cont]);
-    		cont++;
+    
+    UINT *A_prima = malloc(n*sizeof(UINT));
+    UINT *ind = A_prima;
+    for(int i = 0; i<cantidad_threads; i++){
+    	for(int j = index_partitions[i]; j<index_partitions[i]+Si[i];j++){
+    		*ind = A[j];
+    		ind++;
     	}
     }
-    printf("Qi =%u\n", Qi);
+    for(int i = 0; i<cantidad_threads; i++){
+    	for(int j = index_partitions[i]+Si[i]; j<index_partitions[i]+Si[i]+Li[i];j++){
+    		*ind = A[j];
+    		ind++;
+    	}
+
+    }
+
+    int cont = 0;
+    for (UINT *ind = A_prima; ind<A_prima +n; ind++){
+    	printf("A[%d] = %u\n", cont, *ind);
+    	cont++;
+    }
+
+
+
 
 
 
@@ -184,7 +209,7 @@ int main(int argc, char** argv) {
             case 'T':
             strcpy(charT, optarg);
             t = atoi(optarg);
-            if(t < 3 || t > 9){
+            if(t < 1 || t > 9){
                 fprintf(stderr, "%s\n", "T must be betweeen 3 and 9");
                 return 0;
             }
@@ -278,9 +303,9 @@ int main(int argc, char** argv) {
             readvalues += readbytes / 4;
         }
         printf("E%d:\n", i);
-        for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
+        /*for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
             printf("%u\n", *pv);
-        }
+        }*/
         // Quicksorting
 		struct timespec start, finish;
 		double elapsed = 0;
@@ -289,8 +314,9 @@ int main(int argc, char** argv) {
 		clock_gettime(CLOCK_MONOTONIC, &start);
 
 		//quicksort(readbuf, 0, numvalues);
-        parallel_quicksort(readbuf, 0, numvalues);
-
+		UINT arr[64] = {7, 13, 18, 2, 17,22, 76, 87, 98, 76, 54, 65, 45,83, 65, 43,15, 39, 1, 14, 20, 6, 10, 15, 9, 43, 34,23,11,22,33, 43, 47, 48, 55, 77, 3, 16, 19, 4, 11, 12, 5, 8, 12, 34, 52, 64, 34, 45, 23, 89, 99, 45, 24, 23, 54, 76, 59, 76, 53, 65, 45, 87};
+        parallel_quicksort(arr, 0, 64);
+		//parallel_quicksort(readbuf, 0, numvalues);
 		/* Get the wall clock time at finish */
 		clock_gettime(CLOCK_MONOTONIC, &finish);
 
