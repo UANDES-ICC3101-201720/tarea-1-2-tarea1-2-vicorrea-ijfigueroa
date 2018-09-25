@@ -175,9 +175,12 @@ void parallel_quicksort(UINT* A, UINT lo, UINT hi) {
 
    
     for (UINT i = 0; i<cantidad_threads; i++){
+    	printf("Thread: %u\n",i);
     	for (UINT j = 0; j<Si[i]; j++){
+    		printf("J=%u\n",j);
     		*ind = *indA;
     		ind++;
+    		indA++;
     	}
     	indA=indA+Li[i]+1;
     }
