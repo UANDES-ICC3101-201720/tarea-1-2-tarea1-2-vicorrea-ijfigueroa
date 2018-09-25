@@ -171,37 +171,38 @@ void parallel_quicksort(UINT* A, UINT lo, UINT hi) {
     
     UINT *A_prima = malloc(n*sizeof(UINT));
     UINT *ind = A_prima;
-    UINT *indA= A;
-
-   
-    for (UINT i = 0; i<cantidad_threads; i++){
-    	for (UINT j = 0; j<Si[i]; j++){
-    		*ind = *indA;
-    		ind++;
-    	}
-    	indA=indA+Li[i]+1;
-    }
-
-
-    /*
+    UINT aumento = 0;
     for(UINT i = 0; i<cantidad_threads; i++){
+        
+        if (i > 0){
+            if (finales[i] - inicios[i] < finales[i-1] - inicios[i-1]){
+                aumento = 1;
+            }
+        }
     	printf("threadS: %u\n",i );
-    	for(UINT j = index_partitions[i]; j<index_partitions[i]+Si[i];j++){
+    	for(UINT j = index_partitions[i]+aumento; j<index_partitions[i]+Si[i]+aumento;j++){
     		printf("J=%u\n", j);
     		*ind = A[j];
     		ind++;
     	}
     }
+    aumento = 0;
     for(UINT i = 0; i<cantidad_threads; i++){
+        
+        if (i > 0){
+            if (finales[i] - inicios[i] < finales[i-1] - inicios[i-1]){
+                aumento = 1;
+            }
+        }
     	printf("threadL: %u\n",i );
-    	for(UINT j = index_partitions[i]+Si[i]; j<index_partitions[i]+Si[i]+Li[i];j++){
+    	for(UINT j = index_partitions[i]+Si[i]+aumento; j<index_partitions[i]+Si[i]+Li[i]+aumento;j++){
     		printf("J=%u\n", j);
     		*ind = A[j];
     		ind++;
     	}
 
     }
-	*/
+	
     UINT cont = 0;
     for (UINT *ind = A_prima; ind<A_prima +n; ind++){
     	printf("A[%d] = %u\n", cont, *ind);
