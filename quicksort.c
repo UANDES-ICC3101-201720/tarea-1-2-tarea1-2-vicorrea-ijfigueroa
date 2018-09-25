@@ -92,192 +92,190 @@ void parallel_quicksort(UINT* A, UINT lo, UINT hi, UINT cantidad_threads) {
 
     if (cantidad_threads <= 1){
         quicksort(A, lo, hi);
-        printf("sali de quicksort y termineeee\n");
+        //printf("sali de quicksort y termineeee\n");
         return;
     }
     else{
 
-
-
-    int n = hi - lo;
-
-    if (n <= 1){
-        return;
-    }
-
-    printf("Arreglo de largo %d\n", n);  
-    //UINT cantidad_threads = 16;
-    UINT sub_block_size = n/cantidad_threads;
-    UINT cant_bloque_sobrante = n - sub_block_size*cantidad_threads;
-    UINT extra = 0;
-    UINT inicios[cantidad_threads];
-    UINT finales[cantidad_threads];
-    for (UINT i = 0; i < cantidad_threads; i++){       
-        //printf("i = %d, extra = %d\n", i, extra);
-        if (i < cant_bloque_sobrante){            
-            //printf("Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra);
-            inicios[i] = (sub_block_size*i)+extra;
-            finales[i] = (sub_block_size*(i+1))+extra;
-            extra ++;
-            }
-        else{
-            //printf(">> Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra-1);
-            inicios[i] = (sub_block_size*i)+extra;
-            finales[i] = (sub_block_size*(i+1))+extra-1;
+        int n = hi - lo;
+        if (n <= 1){
+            return;
         }
-        //printf("%d\n", inicios[i]);
-        //printf("%d\n", finales[i]);
-    }
 
-    UINT pivot = (rand() % (hi-lo)) + lo;
-    UINT pivot_value=A[pivot];
-    //UINT pivot = 0;
-    printf("pivot: %u\n", A[pivot]);
-    pthread_t threads[cantidad_threads]; 
+        //printf("Arreglo de largo n = %d\n", n);  
+        //UINT cantidad_threads = 16;
+        UINT sub_block_size = n/cantidad_threads;
+        UINT cant_bloque_sobrante = n - sub_block_size*cantidad_threads;
+        UINT extra = 0;
+        UINT inicios[cantidad_threads];
+        UINT finales[cantidad_threads];
+        for (UINT i = 0; i < cantidad_threads; i++){       
+            //printf("i = %d, extra = %d\n", i, extra);
+            if (i < cant_bloque_sobrante){            
+                //printf("Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra);
+                inicios[i] = (sub_block_size*i)+extra;
+                finales[i] = (sub_block_size*(i+1))+extra;
+                extra ++;
+                }
+            else{
+                //printf(">> Creando el thread numero %d que ve desde el %d hasta el %d\n", i, (sub_block_size*i)+extra, (sub_block_size*(i+1))+extra-1);
+                inicios[i] = (sub_block_size*i)+extra;
+                finales[i] = (sub_block_size*(i+1))+extra-1;
+            }
+            //printf("%d\n", inicios[i]);
+            //printf("%d\n", finales[i]);
+        }
 
-    UINT Si[cantidad_threads];
-    UINT Li[cantidad_threads];
+        UINT pivot = (rand() % (hi-lo)) + lo;
+        UINT pivot_value=A[pivot];
+        //UINT pivot = 0;
+        //printf("pivot: %u\n", A[pivot]);
+        pthread_t threads[cantidad_threads]; 
 
-    for (UINT i = 0; i<cantidad_threads; i++){
-    	arguments *argumentos = malloc(sizeof(argumentos));
-    	argumentos->arreglo = A;
-    	argumentos->lo = inicios[i];
-    	argumentos->hi = finales[i];
-    	argumentos->pivot = pivot_value;
+        UINT Si[cantidad_threads];
+        UINT Li[cantidad_threads];
 
-        //printf("inicios[%d] = %d, finales[%d] = %d\n", i, inicios[i], i, finales[i]);
-    	
-        UINT * respuesta;
+        for (UINT i = 0; i<cantidad_threads; i++){
+        	arguments *argumentos = malloc(sizeof(argumentos));
+        	argumentos->arreglo = A;
+        	argumentos->lo = inicios[i];
+        	argumentos->hi = finales[i];
+        	argumentos->pivot = pivot_value;
+
+            //printf("inicios[%d] = %d, finales[%d] = %d\n", i, inicios[i], i, finales[i]);
+        	
+            UINT * respuesta;
+            
+        	UINT ver = pthread_create(&threads[i], NULL, parallel_partition, argumentos);
+        	pthread_join(threads[i], (void **)&respuesta);
+
+            //printf("respuesta = %d\n", (UINT)(intptr_t)respuesta);
+
+            Si[i] = (UINT)(intptr_t)respuesta - inicios[i]+1;
+            Li[i] = finales[i] - (UINT)(intptr_t)respuesta;
+
+        	if(ver){
+        		free(argumentos);
+        	}
+        }
+        /*
+        for (UINT u = 0; u < cantidad_threads; u++){
+                printf("Si[%d] = %d\n", u, Si[u]);
+                printf("Li[%d] = %d\n", u, Li[u]);
+            }
+        */    
+        UINT index_partitions[cantidad_threads];
+        index_partitions[0]=lo;
+        for (UINT i = 1; i<cantidad_threads; i++){
+        	index_partitions[i]=Si[i]+Li[i]+index_partitions[i-1];
+        	//printf("Index[%u]\n",index_partitions[i]);
+        }
+        UINT Qi = 0;
+        UINT Ri = 0;
+        //UINT A_prima[n];
+        for (UINT *ind=Si; ind<Si+cantidad_threads;ind++){
+        	Qi=Qi+*ind;
+
+        }
+        for (UINT *ind=Li; ind<Li+cantidad_threads; ind++){
+        	Ri=Ri+*ind;
+        }
         
-    	UINT ver = pthread_create(&threads[i], NULL, parallel_partition, argumentos);
-    	pthread_join(threads[i], (void **)&respuesta);
-
-        //printf("respuesta = %d\n", (UINT)(intptr_t)respuesta);
-
-        Si[i] = (UINT)(intptr_t)respuesta - inicios[i]+1;
-        Li[i] = finales[i] - (UINT)(intptr_t)respuesta;
-
-    	if(ver){
-    		free(argumentos);
-    	}
-    }
-    /*
-    for (UINT u = 0; u < cantidad_threads; u++){
-            printf("Si[%d] = %d\n", u, Si[u]);
-            printf("Li[%d] = %d\n", u, Li[u]);
-        }
-    */    
-    printf("n=%d\n",n );
-    UINT index_partitions[cantidad_threads];
-    index_partitions[0]=lo;
-    for (UINT i = 1; i<cantidad_threads; i++){
-    	index_partitions[i]=Si[i]+Li[i]+index_partitions[i-1];
-    	//printf("Index[%u]\n",index_partitions[i]);
-    }
-    UINT Qi = 0;
-    UINT Ri = 0;
-    //UINT A_prima[n];
-    for (UINT *ind=Si; ind<Si+cantidad_threads;ind++){
-    	Qi=Qi+*ind;
-
-    }
-    for (UINT *ind=Li; ind<Li+cantidad_threads; ind++){
-    	Ri=Ri+*ind;
-    }
-    
-    
-    UINT *A_prima = malloc(n*sizeof(UINT));
-    UINT *ind = A_prima;
-
-    UINT aumento = 0;
-
-    UINT con_pos = 0;
-
-    for(UINT i = 0; i<cantidad_threads; i++){
         
-        if (i > 0){
-            if (finales[i] - inicios[i] < finales[i-1] - inicios[i-1]){
-                aumento = 1;
+        UINT *A_prima = malloc(n*sizeof(UINT));
+        UINT *ind = A_prima;
+
+        UINT aumento = 0;
+
+        UINT con_pos = 0;
+
+        for(UINT i = 0; i<cantidad_threads; i++){
+            
+            if (i > 0){
+                if (finales[i] - inicios[i] < finales[i-1] - inicios[i-1]){
+                    aumento = 1;
+                }
+            }
+        	//printf("threadS: %u\n",i );
+        	for(UINT j = index_partitions[i]+aumento; j<index_partitions[i]+Si[i]+aumento;j++){
+        		//printf("J=%u\n", j);
+        		*ind = A[j];
+        		ind++;
+                con_pos++;
+        	}
+        }
+
+        UINT mitad = con_pos;
+        //printf("--------------> mitad = %d\n", mitad);
+
+        aumento = 0;
+        for(UINT i = 0; i<cantidad_threads; i++){
+            
+            if (i > 0){
+                if (finales[i] - inicios[i] < finales[i-1] - inicios[i-1]){
+                    aumento = 1;
+                }
+            }
+        	//printf("threadL: %u\n",i );
+        	for(UINT j = index_partitions[i]+Si[i]+aumento; j<index_partitions[i]+Si[i]+Li[i]+aumento;j++){
+        		//printf("J=%u\n", j);
+        		*ind = A[j];
+        		ind++;
+                con_pos++;
+        	}
+
+        }
+    	//printf("--------------> final = %d\n", con_pos);
+        /*
+        UINT cont = 0;
+        for (UINT *ind = A_prima; ind<A_prima +n; ind++){
+        	printf("A[%d] = %u\n", cont, *ind);
+        	cont++;
+        }
+        */
+        //double m = mitad;
+        //double razonL = (con_pos - m)/m; 
+        //double razonS = m/(con_pos - m);
+        //printf("razonL = %f, L/S\n", razonL);
+        //printf("razonS = %f, S/L\n", razonS);
+        /*
+        if (razonS >= razonL){ //Hay mas S que L
+            if(razonL < 0.5){ 
+                printf("Asignando al lado mayor %u threads\n", (UINT)(cantidad_threads*razonL)+1);
+                printf("Asignando al lado menor %u threads\n", cantidad_threads - (UINT)(cantidad_threads*razonL)-1);
+                parallel_quicksort(A, lo, mitad, cantidad_threads - (UINT)(cantidad_threads*razonL)-1);
+                parallel_quicksort(A, mitad+1, hi, (UINT)(cantidad_threads*razonL)+1);
+            }
+            else{
+                printf("Asignando al lado mayor %u threads\n", cantidad_threads - (UINT)(cantidad_threads*razonL)-1);
+                printf("Asignando al lado menor %u threads\n", (UINT)(cantidad_threads*razonL)+1);
+                parallel_quicksort(A, lo, mitad, (UINT)(cantidad_threads*razonL)+1);
+                parallel_quicksort(A, mitad+1, hi, cantidad_threads - (UINT)(cantidad_threads*razonL)-1);
+                }
+            }
+
+        else{ // Hay mas L que S
+            if(razonS < 0.5){
+                printf("Asignando al lado mayor %u threads\n", cantidad_threads - (UINT)(cantidad_threads*razonS)-1);
+                printf("Asignando al lado menor %u threads\n", (UINT)(cantidad_threads*razonS)+1);
+                parallel_quicksort(A, lo, mitad, (UINT)(cantidad_threads*razonS)+1);
+                parallel_quicksort(A, mitad+1, hi, cantidad_threads - (UINT)(cantidad_threads*razonS)-1);
+            }
+            else{
+                printf("Asignando al lado mayor %u threads\n", (UINT)(cantidad_threads*razonS)-1);
+                printf("Asignando al lado menor %u threads\n", cantidad_threads - (UINT)(cantidad_threads*razonS)+1);
+                parallel_quicksort(A, lo, mitad, cantidad_threads - (UINT)(cantidad_threads*razonS)+1);
+                parallel_quicksort(A, mitad+1, hi, (UINT)(cantidad_threads*razonS)-1);
             }
         }
-    	printf("threadS: %u\n",i );
-    	for(UINT j = index_partitions[i]+aumento; j<index_partitions[i]+Si[i]+aumento;j++){
-    		//printf("J=%u\n", j);
-    		*ind = A[j];
-    		ind++;
-            con_pos++;
-    	}
-    }
+        */
+        //printf("Asignando %u threads a cada lado.\n", cantidad_threads/2);
+        parallel_quicksort(A, lo, mitad, cantidad_threads/2);
+        parallel_quicksort(A, mitad+1, hi, cantidad_threads/2);
 
-    UINT mitad = con_pos;
-    printf("--------------> mitad = %d\n", mitad);
-
-    aumento = 0;
-    for(UINT i = 0; i<cantidad_threads; i++){
-        
-        if (i > 0){
-            if (finales[i] - inicios[i] < finales[i-1] - inicios[i-1]){
-                aumento = 1;
-            }
-        }
-    	printf("threadL: %u\n",i );
-    	for(UINT j = index_partitions[i]+Si[i]+aumento; j<index_partitions[i]+Si[i]+Li[i]+aumento;j++){
-    		//printf("J=%u\n", j);
-    		*ind = A[j];
-    		ind++;
-            con_pos++;
-    	}
-
+        free(A_prima);
     }
-	printf("--------------> final = %d\n", con_pos);
-    /*
-    UINT cont = 0;
-    for (UINT *ind = A_prima; ind<A_prima +n; ind++){
-    	printf("A[%d] = %u\n", cont, *ind);
-    	cont++;
-    }
-    */
-    double m = mitad;
-    double razonL = (con_pos - m)/m; 
-    double razonS = m/(con_pos - m);
-    printf("razonL = %f, L/S\n", razonL);
-    printf("razonS = %f, S/L\n", razonS);
-    /*
-    if (razonS >= razonL){ //Hay mas S que L
-        if(razonL < 0.5){ 
-            printf("Asignando al lado mayor %u threads\n", (UINT)(cantidad_threads*razonL)+1);
-            printf("Asignando al lado menor %u threads\n", cantidad_threads - (UINT)(cantidad_threads*razonL)-1);
-            parallel_quicksort(A, lo, mitad, cantidad_threads - (UINT)(cantidad_threads*razonL)-1);
-            parallel_quicksort(A, mitad+1, hi, (UINT)(cantidad_threads*razonL)+1);
-        }
-        else{
-            printf("Asignando al lado mayor %u threads\n", cantidad_threads - (UINT)(cantidad_threads*razonL)-1);
-            printf("Asignando al lado menor %u threads\n", (UINT)(cantidad_threads*razonL)+1);
-            parallel_quicksort(A, lo, mitad, (UINT)(cantidad_threads*razonL)+1);
-            parallel_quicksort(A, mitad+1, hi, cantidad_threads - (UINT)(cantidad_threads*razonL)-1);
-            }
-        }
-
-    else{ // Hay mas L que S
-        if(razonS < 0.5){
-            printf("Asignando al lado mayor %u threads\n", cantidad_threads - (UINT)(cantidad_threads*razonS)-1);
-            printf("Asignando al lado menor %u threads\n", (UINT)(cantidad_threads*razonS)+1);
-            parallel_quicksort(A, lo, mitad, (UINT)(cantidad_threads*razonS)+1);
-            parallel_quicksort(A, mitad+1, hi, cantidad_threads - (UINT)(cantidad_threads*razonS)-1);
-        }
-        else{
-            printf("Asignando al lado mayor %u threads\n", (UINT)(cantidad_threads*razonS)-1);
-            printf("Asignando al lado menor %u threads\n", cantidad_threads - (UINT)(cantidad_threads*razonS)+1);
-            parallel_quicksort(A, lo, mitad, cantidad_threads - (UINT)(cantidad_threads*razonS)+1);
-            parallel_quicksort(A, mitad+1, hi, (UINT)(cantidad_threads*razonS)-1);
-        }
-    }
-    */
-    printf("Asignando %u threads a cada lado.\n", cantidad_threads/2);
-    parallel_quicksort(A, lo, mitad, cantidad_threads/2);
-    parallel_quicksort(A, mitad+1, hi, cantidad_threads/2);
-    }
-    printf("\n");
+    //printf("\n");
 }
 
 int main(int argc, char** argv) {
@@ -356,6 +354,8 @@ int main(int argc, char** argv) {
 
     /* DEMO: request two sets of unsorted random numbers to datagen */
     for (int i = 0; i < experiments; i++) {
+
+        printf("Inicio de la ejecucion numero %d.\n", i);
         /* T value 3 hardcoded just for testing. */
         char begin[] = "BEGIN U ";
         strcat(begin,charT);
@@ -393,9 +393,10 @@ int main(int argc, char** argv) {
             readvalues += readbytes / 4;
         }
         printf("E%d:\n", i);
-        /*for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
-            printf("%u\n", *pv);
-        }*/
+        for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
+            printf("%u, ", *pv);
+        }
+        printf("\n");
         // Quicksorting
 		struct timespec start, finish;
 		double elapsed = 0;
@@ -417,14 +418,14 @@ int main(int argc, char** argv) {
 		elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
 
 		/* Print the time elapsed (in seconds) */
-
+        /*
 		printf("\n\nTiempo: %lf\n\n\n", elapsed);
 
         printf("\n");
 		printf("Tiempo quicksort: %lf\n", elapsed);
+        */
 
-
-		printf("\nTiempo quicksort: %lf\n\n", elapsed);
+		printf("\nTiempo quicksort paralelo: %lf\n\n", elapsed);
 
         // 
         //quicksort(readbuf, 0, numvalues);
@@ -432,8 +433,9 @@ int main(int argc, char** argv) {
         
         printf("S%d:\n", i);
         for (UINT *pv = readbuf; pv < readbuf + numvalues; pv++) {
-            printf("%u\n", *pv);
+            printf("%u, ", *pv);
         }
+        printf("\n");
 
         free(readbuf);
         printf("Fin de la ejecucion numero %d.\n\n", i);
